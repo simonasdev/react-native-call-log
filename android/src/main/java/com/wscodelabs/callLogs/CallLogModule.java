@@ -55,7 +55,7 @@ public class CallLogModule extends ReactContextBaseJavaModule {
         try {
             boolean nullFilter = filter == null;
             boolean withoutNameFilter = !nullFilter && filter.hasKey("withoutName") && filter.getBoolean("withoutName");
-            String selection = withoutNameFilter ? Calls.CACHED_NAME + "IS NULL" : null;
+            String selection = withoutNameFilter ? Calls.CACHED_NAME + " IS NULL" : null;
 
             Cursor cursor = this.context.getContentResolver().query(
                 CallLog.Calls.CONTENT_URI,
