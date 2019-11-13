@@ -12,6 +12,7 @@ class CallLogs {
     return NativeCallLogs.loadWithFilter(
       limit,
       {
+        ...filter,
         minTimestamp: minTimestamp ? minTimestamp.toString() : undefined,
         maxTimestamp: maxTimestamp ? maxTimestamp.toString() : undefined,
         phoneNumbers: JSON.stringify(phoneNumbersArray),

@@ -53,8 +53,17 @@ public class CallLogModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void loadWithFilter(int limit, @Nullable ReadableMap filter, Promise promise) {
         try {
-            Cursor cursor = this.context.getContentResolver().query(CallLog.Calls.CONTENT_URI,
-                    null, null, null, CallLog.Calls.DATE + " DESC");
+            boolean nullFilter = filter == null;
+            boolean withoutNameFilter = !nullFilter && filter.hasKey("withoutName") && filter.getBoolean("withoutName");
+            String selection = withoutNameFilter ? Calls.CACHED_NAME + "IS NULL" : null;
+
+            Cursor cursor = this.context.getContentResolver().query(
+                CallLog.Calls.CONTENT_URI,
+                null,
+                selection,
+                null,
+                CallLog.Calls.DATE + " DESC"
+            );
 
             WritableArray result = Arguments.createArray();
 
@@ -63,7 +72,6 @@ public class CallLogModule extends ReactContextBaseJavaModule {
                 return;
             }
 
-            boolean nullFilter = filter == null;
             String minTimestamp = !nullFilter && filter.hasKey("minTimestamp") ? filter.getString("minTimestamp") : "0";
             String maxTimestamp = !nullFilter && filter.hasKey("maxTimestamp") ? filter.getString("maxTimestamp") : "-1";
             String phoneNumbers = !nullFilter && filter.hasKey("phoneNumbers") ? filter.getString("phoneNumbers") : "[]";
@@ -100,7 +108,7 @@ public class CallLogModule extends ReactContextBaseJavaModule {
 
                 String type = this.resolveCallType(rawType);
 
-                boolean passesPhoneFilter = phoneNumberSet == null || phoneNumberSet.isEmpty() || phoneNumberSet.contains(phoneNumber);
+                boolean passesPhoneFilter = phoneNumberSet.isEmpty() || phoneNumberSet.contains(phoneNumber);
                 boolean passesMinTimestampFilter = minTimestamp == null || minTimestamp.equals("0") || Long.parseLong(timestampStr) >= Long.parseLong(minTimestamp);
                 boolean passesMaxTimestampFilter = maxTimestamp == null || maxTimestamp.equals("-1") || Long.parseLong(timestampStr) <= Long.parseLong(maxTimestamp);
                 boolean passesRawTypeFilter = rawTypeSet.isEmpty() || rawTypeSet.contains(rawType);
